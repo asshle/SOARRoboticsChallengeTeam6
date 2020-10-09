@@ -8,10 +8,16 @@ struct HardwarePinsInterfacing
   //Insert all pin definitions here]
   int ultraTriggerPin; // ultra sonic trigger 
   int ultraEchoPin; // ultra sonic echo 
+  int zDepthSensorPin ; // Ir sensor pin no
+  int baseMotorPin;
+  int motorArm0Pin;
+  int motorArm1Pin;
+  int motorGripperPin;
+  
 };
 struct Processes
 {
-  bool threadHalt =false; // pause process when true
+  bool threadHalt =false; // process will be paused if true
   int readSensorTimeSlice = 50; // interval for readSensor thread
   int readSensorLastTime=0;//last instance (in millis()) for sensor read
 };
@@ -20,6 +26,8 @@ struct ArmsVars
   double len; // length of each segment of the arm
   double mX=0.0,mY =0.0 ; //starting position of each segment of the arm
   double polR=0.0,polTiter=0.0; // polar coordinate of the arm orientation
+  int pinNo;//
+  Servo ArmServo;
   
 };
 HardwarePinsInterfacing hardware;
@@ -53,7 +61,7 @@ void loop()
     // events for when program is in halt
   }
 }
-// =====================Computations Codes =======================
+// =====================Computations Codes ==========================================
 
 void convertToPolarCoord(ArmsVars arm)
 {
@@ -61,6 +69,13 @@ void convertToPolarCoord(ArmsVars arm)
   arm.polR = sqrt(pow(arm.mX,2)+pow(arm.mY,2));
   arm.polTiter = 1/tan(arm.mY/arm.mX);
 }
+
+//=====================Initialise Codes =============================================
+void initServoArms(int pinNo)
+{
+  
+}
+
 
 //=====================Hardware Interfacing / conversion Codes=======================
 void ultraSonicReading(void)
@@ -94,11 +109,3 @@ void ultraSonicReading(void)
     //SerialBT.print(radarMotor.read());SerialBT.print(" ");SerialBT.println(distance);
   }*/
 }
-
-
-
-
-
-
-
-
