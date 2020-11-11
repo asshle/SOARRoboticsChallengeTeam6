@@ -1,7 +1,5 @@
-
+//ope
 #include <Servo.h>
-
-void ultraSonicReading(void);
 
 struct HardwarePinsInterfacing
 {
@@ -9,17 +7,17 @@ struct HardwarePinsInterfacing
   int ultraTriggerPin; // ultra sonic trigger 
   int ultraEchoPin; // ultra sonic echo 
   int zDepthSensorPin ; // Ir sensor pin no
-  int baseMotorPin;
-  int motorArm0Pin;
-  int motorArm1Pin;
-  int motorGripperPin;
+  int baseMotorPin; // base motor pin 
+  int motorArm0Pin; // arm0 Pin 
+  int motorArm1Pin; // arm1 Pin 
+  int motorGripperPin; // Gripper motor Pin
   
 };
 struct Processes
 {
   bool threadHalt =false; // process will be paused if true
-  int readSensorTimeSlice = 50; // interval for readSensor thread
-  int readSensorLastTime=0;//last instance (in millis()) for sensor read
+  int readCommandTimeSlice = 1; // interval for readCommand thread
+  int readCommandLastTime=0;//last instance (in millis()) for sensor read
 };
 struct ArmsVars
 {
@@ -30,6 +28,12 @@ struct ArmsVars
   Servo ArmServo;
   
 };
+
+void readCommand(void);
+void ultraSonicReading(void);
+void convertToPolarCoord(ArmsVars arm);
+void initServoArms(ArmsVars arm);
+
 HardwarePinsInterfacing hardware;
 Processes processes;
 
@@ -49,12 +53,14 @@ void loop()
   if(!processes.threadHalt) //used in program pause
   {
     //Individual threads goes here
-    if( (unsigned long)(currentTime-processes.readSensorLastTime)>=processes.readSensorTimeSlice)
+    if( (unsigned long)(currentTime-processes.readCommandLastTime)>=processes.readCommandTimeSlice)
     {
      //readingSensor thread
-     //readSensor();
-     processes.readSensorLastTime = currentTime;
+     readCommand(); 
+     processes.readCommandLastTime = currentTime;
     }
+
+    
   }
   else
   {
@@ -65,17 +71,108 @@ void loop()
 
 void convertToPolarCoord(ArmsVars arm)
 {
-  //(arm.mX)^(2.0) +(arm.mY)^(2.0)
   arm.polR = sqrt(pow(arm.mX,2)+pow(arm.mY,2));
   arm.polTiter = 1/tan(arm.mY/arm.mX);
 }
 
 //=====================Initialise Codes =============================================
-void initServoArms(int pinNo)
+void initAllMotors(ArmsVars motor[])
 {
-  
+  for (int i =0 ; i<=sizeof(motor);i++)
+  {
+    //TODO: call void initServoArms(ArmsVars arm) here
+  }
+}
+void initServoArms(ArmsVars arm)
+{
+  arm.ArmServo.attach(arm.pinNo);
 }
 
+//=====================Communications Codes =============================================
+void readCommand(void)
+{
+  String Command = Serial.readString(); // reading incoming serial 
+  Command.trim();
+  //Serial.println("Test");
+  //String param[] ;
+  if(Command!= "" )
+  {
+    //Serial.println(Command);
+    char** commands = returnCommandParam(':' , Command);
+    //char** commands = myFunction();
+    Serial.print("Main ");Serial.println(commands[4]);
+  }
+}
+char** myFunction() // test function 
+{  
+    char ** sub_str = malloc(10 * sizeof(char*));
+    Serial.println("entered");
+    char* test ="hello";
+    for (int i =0 ; i < 10; ++i)
+    {
+      sub_str[i] = malloc(20 * sizeof(char));
+      strcpy(sub_str[i],test);
+      //Serial.println( sub_str[0]);
+    } 
+    Serial.println(sub_str[0]);
+    return sub_str;
+}
+
+char** returnCommandParam(char delimiter , String Command)
+{
+  /// Returns  linked list of the command parameters
+  
+  char CommandChar[Command.length()+1];  
+  int count= 0; 
+  Command.toCharArray(CommandChar,Command.length()+1);//Converting to char Array
+  int returnArrayLen =countDelimiter(delimiter,CommandChar,Command.length()); // getting no of occurance of delimiters
+  char ** sub_str = malloc(returnArrayLen+1* sizeof(char*));
+  
+  for (int i =0 ; i <= returnArrayLen; ++i)
+  {
+    ///iterating through all the instance of "String" Array length
+    
+    char* temp=malloc(20* sizeof(char*));
+    int tempSize = 0; 
+    while(CommandChar[count]!=delimiter && count < sizeof(CommandChar))
+    {
+      
+      tempSize++;
+      count++;
+    }
+    count ++; // to skip the delimiter 
+    //char tempTransfer[temp.length] = temp.c_str();
+    
+    //Setting String length in each instance
+    sub_str[i] = malloc(tempSize * sizeof(char)); //Dynamically set length of the String length 
+    strcpy(sub_str[i],temp);
+    Serial.println(temp);
+  }
+  Serial.println(sub_str[0]);
+  
+  return sub_str;
+}
+
+int countDelimiter (char delimiter,char CommandChar[],int charLen)
+{
+  /// Return count of delimiter in a given string 
+  
+  int count=0; 
+  //Testing Points 
+  //Serial.print("charLen : ");Serial.println(charLen);
+  for(int j=0 ; j<=charLen ; j++)
+  {
+     //Testing Points 
+    //Serial.println(CommandChar[j]);
+    if(CommandChar[j]==delimiter)
+    {
+      count++;
+    }
+  }
+  //Testing Points 
+  //Serial.print("DelimiterCount : "); Serial.println(count);
+  return count;
+}
 
 //=====================Hardware Interfacing / conversion Codes=======================
 void ultraSonicReading(void)
