@@ -24,11 +24,11 @@ def move_servo(var):
     reachedPos = str(arduino.readline()) #get value back from arduino
     print (reachedPos)
 
-
 # MAIN
 window = tkinter.Tk() #create tkinter window
 window.title("Servo angle control") #give title
 window.configure(background="white") #change background color
+
 
 # Create a slider for servo position
 servo = tkinter.Scale(window, activebackground="blue",
@@ -44,6 +44,11 @@ red=90, yellow=10, height = 300, width = 500)
 button_exit = tkinter.Button(window, text="Exit", font=('Verdana',16),
 padx=100, pady = 10,
 command=close_window)
+
+# Create a Stack to store the history of positions
+position = []
+
+# Create a button to store the servo angle into the stack
 
 #pack your buttons, sliders
 servo.grid(row=1, column=0)
