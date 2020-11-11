@@ -11,18 +11,18 @@ arduino = serial.Serial('com6',9600)
 
 #Function call to close your program
 def close_window():
-arduino.close()
-window.destroy()
+    arduino.close()
+    window.destroy()
 
 #Function call to move_servo button
 def move_servo(var):
-speed_gauge.set_value(var) #set value to the speed gauge
-print(var) #print value for cross-check
-#send servo angle value to arduino
-arduino.write(str(var).encode()) #write this value to arduino
-#get servo angle ack from arduino to cross-check
-reachedPos = str(arduino.readline()) #get value back from arduino
-print (reachedPos)
+    speed_gauge.set_value(var) #set value to the speed gauge
+    print(var) #print value for cross-check
+    #send servo angle value to arduino
+    arduino.write(str(var).encode()) #write this value to arduino
+    #get servo angle ack from arduino to cross-check
+    reachedPos = str(arduino.readline()) #get value back from arduino
+    print (reachedPos)
 
 
 # MAIN
