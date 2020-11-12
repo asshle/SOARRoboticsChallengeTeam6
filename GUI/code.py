@@ -7,7 +7,7 @@ import tk_tools
 
 #Connect to arduino via serial port
 #com6 --> Change port accordingly to yours
-arduino = serial.Serial('com6',9600)
+arduino = serial.Serial('com5',9600)
 
 #Function call to close your program
 def close_window():
