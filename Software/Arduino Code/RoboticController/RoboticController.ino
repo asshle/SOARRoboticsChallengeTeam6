@@ -8,17 +8,20 @@ struct HardwarePinsInterfacing
   int ultraEchoPin; // ultra sonic echo 
   int zDepthSensorPin ; // Ir sensor pin no
   int baseMotorPin; // base motor pin 
-  int motorArm0Pin; // arm0 Pin 
-  int motorArm1Pin; // arm1 Pin 
-  int motorGripperPin; // Gripper motor Pin
-  
+  int motorArm0Pin=11; // joint on base Pin 
+  int motorArm1Pin=10; // joint on arm Pin 
+  int motorGripperPin=9; // Gripper pin
+  bool gripperState = false; 
 };
 struct Processes
 {
   bool threadHalt =false; // process will be paused if true
   int readCommandTimeSlice = 1; // interval for readCommand thread
   int readCommandLastTime=0;//last instance (in millis()) for sensor read
+  int writeMotorTimeSlice = 1; // interval for readCommand thread
+  int writeMotorLastTime=0;//last instance (in millis()) for sensor read
 };
+
 struct ArmsVars
 {
   double len; // length of each segment of the arm
@@ -36,10 +39,12 @@ void initServoArms(ArmsVars arm);
 
 HardwarePinsInterfacing hardware;
 Processes processes;
+ArmsVars motor [2];
 
 void setup() 
 {
   Serial.begin(9600);
+  initSystem(); 
 }
 
 void loop() 
@@ -47,7 +52,7 @@ void loop()
   /// Concept below follows "multi threading" by using time slicing methods 
   /// for more info : https://learn.adafruit.com/multi-tasking-the-arduino-part-1/using-millis-for-timing 
 
-  // scan cycle : readSensor -> ComputeAction ->WriteMotorAngle
+  // scan cycle : readSensor -> ComputeAction ->WriteMotorAngle 
   
   unsigned long currentTime = millis(); // updating clock cycle 
   if(!processes.threadHalt) //used in program pause
@@ -59,7 +64,16 @@ void loop()
      readCommand(); 
      processes.readCommandLastTime = currentTime;
     }
-
+    if( (unsigned long)(currentTime-processes.writeMotorLastTime)>=processes.writeMotorTimeSlice)
+    {
+     //Write Motor thread
+     
+      moveMotor(motor[2],100);
+      moveMotor(motor[1],90);
+      moveMotor(motor[0],110);
+      //gripperChange();
+      processes.writeMotorLastTime = currentTime;
+    }
     
   }
   else
@@ -76,34 +90,49 @@ void convertToPolarCoord(ArmsVars arm)
 }
 
 //=====================Initialise Codes =============================================
+void initSystem() 
+{
+ 
+  initAllMotors(motor);
+
+  
+  Serial.println("System:System Initialised");
+}
 void initAllMotors(ArmsVars motor[])
 {
+  /// Pins definations can be found in HardwarePinsInterfacing struct 
+  //pins : 9,10,11
+  motor[0].pinNo=hardware.motorGripperPin;
+  motor[1].pinNo=hardware.motorArm1Pin;
+  motor[2].pinNo=hardware.motorArm0Pin;
+  
+  //motor[2].ArmServo.attach(motor[2].pinNo);
   for (int i =0 ; i<=sizeof(motor);i++)
   {
     //TODO: call void initServoArms(ArmsVars arm) here
+    motor[i].ArmServo.attach(motor[i].pinNo);
   }
+  gripperChange();
+  Serial.println("System:Motor Initialised");
 }
-void initServoArms(ArmsVars arm)
-{
-  arm.ArmServo.attach(arm.pinNo);
-}
-
 //=====================Communications Codes =============================================
 void readCommand(void)
 {
   String Command = Serial.readString(); // reading incoming serial 
+ 
   Command.trim();
   //Serial.println("Test");
   //String param[] ;
   if(Command!= "" )
   {
+    //Serial.println("ReadBack:"+Command);
     //Serial.println(Command);
     char** commands = returnCommandParam(':' , Command);
     //char** commands = myFunction();
-    Serial.print("Main ");Serial.println(commands[4]);
+    Serial.print("Main: ");Serial.println(commands[1]);
   }
 }
-char** myFunction() // test function 
+/*char** myFunction() // test function 
 {  
     char ** sub_str = malloc(10 * sizeof(char*));
     Serial.println("entered");
@@ -149,6 +178,41 @@ char** returnCommandParam(char delimiter , String Command)
     Serial.println(temp);
   }
   Serial.println(sub_str[0]);
+  
+  return sub_str;
+}*/
+
+char** returnCommandParam(char delimiter , String Command)
+{
+  /// Returns  linked list of the command parameters
+  
+  char CommandChar[Command.length()+1];
+  int count= 0;
+  Command.toCharArray(CommandChar,Command.length()+1);//Converting to char Array
+  int returnArrayLen =countDelimiter(delimiter,CommandChar,Command.length()); // getting no of occurance of delimiters
+  char ** sub_str = malloc(returnArrayLen+1* sizeof(char*));
+  
+  for (int i =0 ; i <= returnArrayLen; ++i)
+  {
+    ///iterating through all the instance of "String" Array length
+    
+    char* temp=malloc(20* sizeof(char*));
+    int tempSize = 0;
+    while(CommandChar[count]!=delimiter && count < sizeof(CommandChar))
+    {
+      temp[count]=CommandChar[count];
+      tempSize++;
+      count++;
+    }
+    count ++;// to skip the delimiter
+    //char tempTransfer[temp.length] = temp.c_str();
+    
+    //Setting String length in each instance
+    sub_str[i] = malloc(tempSize * sizeof(char)); //Dynamically set length of the String length
+    strcpy(sub_str[i],temp);
+    //Serial.println(temp);
+  }
+  //Serial.println(sub_str[0]);
   
   return sub_str;
 }
@@ -205,4 +269,41 @@ void ultraSonicReading(void)
     //Serial.print(radarMotor.read());Serial.print(" ");Serial.println(distance);
     //SerialBT.print(radarMotor.read());SerialBT.print(" ");SerialBT.println(distance);
   }*/
+}
+
+void moveMotor(ArmsVars motor , int deg)
+{
+  if (motor.ArmServo.read() < deg)
+  {
+    while(motor.ArmServo.read() != deg)
+    {
+      motor.ArmServo.write(motor.ArmServo.read()+1);
+      //Serial.println(motor.ArmServo.read());
+    } 
+  }
+  else
+  {
+    while(motor.ArmServo.read() != deg)
+    {
+      motor.ArmServo.write(motor.ArmServo.read()-1);
+      //Serial.println(motor.ArmServo.read());
+    } 
+  }
+}
+
+void gripperChange()
+{
+
+  Serial.println(motor[0].ArmServo.read());
+  Serial.println(motor[0].ArmServo.attached());
+  if(motor[0].ArmServo.read() != 110)
+  {
+   motor[0].ArmServo.write(110);
+   hardware.gripperState = true;
+  }
+  else
+  {
+  motor[0].ArmServo.write(90);
+  hardware.gripperState = false;
+  }
 }
