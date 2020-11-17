@@ -8,8 +8,8 @@ import tk_tools
 #Function call to close your program
 def close_window():
     window.destroy()
-save_history = []
 
+save_history = []
 #Function call to move_servo button
 def move_servo(var):
     # Getting angle from the srvo
@@ -44,13 +44,33 @@ def update_history(position):
 def mode_change():
     pass
 
+def mode_change():
+    """Changes the mode of the robotic arm"""
+    if button_mode_change.config('relief')[-1] == 'sunken':
+        button_mode_change.config(relief="raised")
+        print("GripperChange:0")
+    else:
+        button_mode_change.config(relief="sunken")
+        print("GripperChange:1")
+
 def automatic_mode():
     pass
 def manual_mode():
     pass
 
+def gripper_change():
+    if button_gripper.config('relief')[-1] == 'sunken':
+        button_gripper.config(relief="raised")
+        print("GripperChange:0")
+    else:
+        button_gripper.config(relief="sunken")
+        print("GripperChange:1")
+
+
 def emergency_stop():
-    pass
+    print("Pause:0")
+
+
 
 # MAIN
 window = tkinter.Tk() #create tkinter window
@@ -94,16 +114,18 @@ speed_gauge3 = tk_tools.Gauge(window, max_value=180, bg='white',
 label='Servo angle', unit=' deg',
 red=90, yellow=10, height = 300, width = 500)
 
-button_exit = tkinter.Button(window, text="Exit", font=('Verdana',10),
-padx=50, pady = 10,
-command=close_window)
+button_mode_change = tkinter.Button(window, text="Mode Change", font=('Verdana',10),
+padx=50, pady = 10, relief="raised",command=mode_change)
 
 # button_save_state = tkinter.Button(window, text="Save", bg="red", font=('Verdana',10),
 # padx=50, pady = 10,
 # command=lambda : (save_history.append(f"Move:{servo.get()}:{servo2.get()}:{servo3.get()}")))
 
-button_save_state = tkinter.Button(window, text="Save", bg="red", font=('Verdana',10),
+button_save_state = tkinter.Button(window, text="Save", bg="green", font=('Verdana',10),
 padx=50, pady = 10,command=save_state)
+button_stop = tkinter.Button(window, text="STOPPP!", bg="red", font=('Verdana',10),
+padx=50, pady = 10,command=emergency_stop)
+button_gripper = tkinter.Button(text="Toggle",bg="lightblue", font=('Verdana',10),width=12, relief="raised",command=gripper_change)
 
 text_save_history=tkinter.Label(window,text=str(save_history),font=('Verdana',10)
 ,padx=10,pady=10)
@@ -117,8 +139,10 @@ speed_gauge.grid(row=0, column=0)
 speed_gauge2.grid(row=0, column=1)
 speed_gauge3.grid(row=0, column=2)
 
-button_exit.grid(row=2,column=0,columnspan=2)
-button_save_state.grid(row=2,column=1,columnspan=2)
+button_mode_change.grid(row=2,column=0,columnspan=1)
+button_save_state.grid(row=2,column=1,columnspan=1)
+button_stop.grid(row=2, column=2)
+button_gripper.grid(row=2,column=3)
 
 text_save_history.grid(row=3,column=0,columnspan=3,rowspan=10)
 
