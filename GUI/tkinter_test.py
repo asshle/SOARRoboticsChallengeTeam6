@@ -40,11 +40,17 @@ def save_state():
 def update_history(position):
     #<label name>.config(text="<new text>" + str(<variable name>))
     text_save_history.config(text="History:" + str(save_history),wraplength=1000)
-    # for r in range(3):
-    #     for c in range(4):
-    #         text_save_history.config(text="History:" + str(save_history),
-    #             borderwidth=1 ).grid(row=r,column=c)
 
+def mode_change():
+    pass
+
+def automatic_mode():
+    pass
+def manual_mode():
+    pass
+
+def emergency_stop():
+    pass
 
 # MAIN
 window = tkinter.Tk() #create tkinter window
