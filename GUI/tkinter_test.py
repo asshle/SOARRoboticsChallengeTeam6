@@ -41,20 +41,22 @@ def update_history(position):
     #<label name>.config(text="<new text>" + str(<variable name>))
     text_save_history.config(text="History:" + str(save_history),wraplength=1000)
 
-def mode_change():
-    pass
+
 
 def mode_change():
     """Changes the mode of the robotic arm"""
     if button_mode_change.config('relief')[-1] == 'sunken':
         button_mode_change.config(relief="raised")
-        print("GripperChange:0")
+        
     else:
         button_mode_change.config(relief="sunken")
-        print("GripperChange:1")
+        automatic_mode()
+        button_mode_change.config(relief="raised")
 
 def automatic_mode():
-    pass
+    for i in reversed(save_history):
+        print(i)
+
 def manual_mode():
     pass
 
@@ -125,7 +127,7 @@ button_save_state = tkinter.Button(window, text="Save", bg="green", font=('Verda
 padx=50, pady = 10,command=save_state)
 button_stop = tkinter.Button(window, text="STOPPP!", bg="red", font=('Verdana',10),
 padx=50, pady = 10,command=emergency_stop)
-button_gripper = tkinter.Button(text="Toggle",bg="lightblue", font=('Verdana',10),width=12, relief="raised",command=gripper_change)
+button_gripper = tkinter.Button(text="Gripper Toggle",bg="lightblue", font=('Verdana',8),width=12, relief="raised",command=gripper_change)
 
 text_save_history=tkinter.Label(window,text=str(save_history),font=('Verdana',10)
 ,padx=10,pady=10)
