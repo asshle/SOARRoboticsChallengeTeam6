@@ -15,7 +15,7 @@ def close_window():
     window.destroy()
 
 #Function call to move_servo button
-def move_servo(var):
+def move_servo(var,num):
     speed_gauge.set_value(var) #set value to the speed gauge
     print(var) #print value for cross-check
     #send servo angle value to arduino
@@ -41,6 +41,8 @@ command = move_servo)
 speed_gauge = tk_tools.Gauge(window, max_value=180, bg='white',
 label='Servo angle', unit=' deg',
 red=90, yellow=10, height = 300, width = 500)
+
+
 button_exit = tkinter.Button(window, text="Exit", font=('Verdana',16),
 padx=100, pady = 10,
 command=close_window)
