@@ -1,5 +1,3 @@
-
-
 #Import following packages
 import serial
 import tkinter
@@ -26,7 +24,7 @@ def move_servo(var,num):
     speed_gauge.set_value(servo1_angle) 
     speed_gauge2.set_value(servo2_angle) 
     speed_gauge3.set_value(servo3_angle) 
-    move_command = (f"Move:{servo1_angle}:{servo2_angle}:{servo3_angle}") 
+    move_command = f"Move:{servo1_angle}:{servo2_angle}:{servo3_angle}:"
     print(move_command)
     print("save_history"+str(save_history))
 
@@ -41,7 +39,7 @@ def save_state():
     servo1_angle = servo.get()
     servo2_angle = servo2.get()
     servo3_angle = servo3.get()
-    position = f"Move:{servo1_angle}:{servo2_angle}:{servo3_angle}"
+    position = f"Move:{servo1_angle}:{servo2_angle}:{servo3_angle}:"
     save_history.append(position)
     update_history(position)
     return save_history
@@ -63,7 +61,7 @@ def mode_change():
 
 def automatic_mode():
     """move the Robotic Arm according to save history"""
-    for move_command in reversed(save_history):
+    for move_command in save_history:
         # Add in Handshake check
         print(move_command)
         arduino.write(str(move_command).encode()) #write this value to arduino
@@ -123,7 +121,7 @@ speed_gauge3 = tk_tools.Gauge(window, max_value=180, bg='white',
 label='Servo angle', unit=' deg',
 red=90, yellow=10, height = 300, width = 500)
 
-button_mode_change = tkinter.Button(window, text="Mode Change", font=('Verdana',10),
+button_mode_change = tkinter.Button(window, text="Auto Mode", font=('Verdana',10),
 padx=50, pady = 10, relief="raised",command=mode_change)
 button_save_state = tkinter.Button(window, text="Save", bg="green", font=('Verdana',10),
 padx=50, pady = 10,command=save_state)
@@ -148,7 +146,6 @@ button_stop.grid(row=2, column=2)
 button_gripper.grid(row=2,column=3)
 
 text_save_history.grid(row=3,column=0,columnspan=3,rowspan=10)
-
 
 #execute the loop
 window.mainloop()
