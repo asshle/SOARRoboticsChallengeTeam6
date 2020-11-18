@@ -117,6 +117,11 @@ label = " Set the Angle of Base Motor",
 bg = "white", font=('Verdana',16), from_=0, to=180,
 orient=tkinter.HORIZONTAL, length= 400,
 command = move_servo)
+servo.set(90)
+servo2.set(90)
+servo3.set(70)
+
+
 
 # Speed Gauge
 #Create a speed-gauge using tk-tools module
