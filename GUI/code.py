@@ -2,6 +2,7 @@
 import serial
 import tkinter
 import tk_tools
+import time
 
 #Connect to arduino via serial port
 #com6 --> Change port accordingly to yours
@@ -15,7 +16,7 @@ def close_window():
 save_history = []
 
 #Function call to move_servo button
-def move_servo(var,num):
+def move_servo(var):
     # Getting angle from the srvo
     servo1_angle = servo.get()
     servo2_angle = servo2.get()
@@ -29,9 +30,8 @@ def move_servo(var,num):
     print("save_history"+str(save_history))
 
     arduino.write(str(move_command).encode()) #write this value to arduino
-    #get servo angle ack from arduino to cross-check
     reachedPos = str(arduino.readline()) #get value back from arduino
-    print(reachedPos)
+    print(f"Arduino :{reachedPos}")
 
 # Create a Stack to store the history of positions
 def save_state():
@@ -42,6 +42,9 @@ def save_state():
     position = f"Move:{servo1_angle}:{servo2_angle}:{servo3_angle}:"
     save_history.append(position)
     update_history(position)
+    reachedPos = str(arduino.readline()) #get value back from arduino
+    print(f"Arduino :{reachedPos}")
+
     return save_history
 
 def update_history(position):
@@ -65,7 +68,13 @@ def automatic_mode():
         # Add in Handshake check
         print(move_command)
         arduino.write(str(move_command).encode()) #write this value to arduino
+        reachedPos = str(arduino.readline()) #get value back from arduino
+        print(f"Arduino :{reachedPos}")
 
+    for i in range(5):
+        reachedPos = str(arduino.readline()) #get value back from arduino
+        print(f"Arduino :{reachedPos}")
+        time.sleep(0.1)
 def gripper_change():
     if button_gripper.config('relief')[-1] == 'sunken':
         button_gripper.config(relief="raised")

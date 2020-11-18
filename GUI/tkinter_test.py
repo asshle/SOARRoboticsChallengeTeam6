@@ -21,7 +21,7 @@ def move_servo(var):
     speed_gauge2.set_value(servo2_angle) 
     speed_gauge3.set_value(servo3_angle) 
     print("save_history"+str(save_history))
-
+    print(f"Arduino : ")
     print(f"Move:{servo1_angle}:{servo2_angle}:{servo3_angle}") #print value for cross-check
     #send servo angle value to arduino
     #get servo angle ack from arduino to cross-check
@@ -38,10 +38,7 @@ def save_state():
     return save_history
 
 def update_history(position):
-    #<label name>.config(text="<new text>" + str(<variable name>))
     text_save_history.config(text="History:" + str(save_history),wraplength=1000)
-
-
 
 def mode_change():
     """Changes the mode of the robotic arm"""
@@ -55,6 +52,8 @@ def mode_change():
 
 def automatic_mode():
     for i in reversed(save_history):
+        print(f"Arduino : ")
+
         print(i)
 
 def manual_mode():
@@ -68,6 +67,9 @@ def gripper_change():
         button_gripper.config(relief="sunken")
         print("GripperChange:1")
 
+def read_arduino(event):
+
+    print("yes")
 
 def emergency_stop():
     print("Pause:0")
