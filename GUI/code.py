@@ -6,8 +6,8 @@ import time
 
 #Connect to arduino via serial port
 #com6 --> Change port accordingly to yours
-arduino = serial.Serial('com5',9600)
-
+arduino = serial.Serial('com4',9600)
+ 
 #Function call to close your program
 def close_window():
     arduino.close()
@@ -30,8 +30,10 @@ def move_servo(var):
     print("save_history"+str(save_history))
 
     arduino.write(str(move_command).encode()) #write this value to arduino
-    reachedPos = str(arduino.readline()) #get value back from arduino
-    print(f"Arduino :{reachedPos}")
+    for i in range(5):
+        reachedPos = str(arduino.readline()) #get value back from arduino
+        print(f"Arduino :{reachedPos}")
+        time.sleep(0.1)
 
 # Create a Stack to store the history of positions
 def save_state():
@@ -115,7 +117,7 @@ command = move_servo)
 servo3 = tkinter.Scale(window, activebackground="blue",
 label = " Set the Angle of Base Motor",
 bg = "white", font=('Verdana',16), from_=0, to=180,
-orient=tkinter.HORIZONTAL, length= 400,
+orient=tkinter.HORIZONTAL, length= 400,-
 command = move_servo)
 
 # Speed Gauge

@@ -42,6 +42,7 @@ void initServoArms(ArmsVars arm);
 HardwarePinsInterfacing hardware;
 Processes processes;
 ArmsVars motor [3];
+int targetAngle[] = {90,90,70};  // motor angle target state
 
 void setup() 
 {
@@ -54,57 +55,29 @@ void loop()
   /// Concept below follows "multi threading" by using time slicing methods 
   /// for more info : https://learn.adafruit.com/multi-tasking-the-arduino-part-1/using-millis-for-timing 
 
-  // scan cycle : readSensor -> ComputeAction ->WriteMotorAngle 
-  
-  unsigned long currentTime = millis(); // updating clock cycle 
+  // scan cycle : readSensor -> ComputeAction ->WriteMotorAngle
+  unsigned long currentTime = millis(); // updating clock cycle
+  readCommand(); // reading input commands 
   if(!processes.threadHalt) //used in program pause
   {
-    //Individual threads goes here
-    /*if( (unsigned long)(currentTime-processes.readCommandLastTime)>=processes.readCommandTimeSlice)
-    {
-     //readingSensor thread
-     readCommand(); 
-     processes.readCommandLastTime = currentTime;
-    }*/
     if( (unsigned long)(currentTime-processes.writeMotorLastTime)>=processes.writeMotorTimeSlice)
     {
      //Write Motor thread
-     
-      int targetAngle[] = {110,45,60};
       moveAllMotors(motor,targetAngle);
-
-      //gripperChange();
-      
-      printMotorState();
+      //printMotorState();
       processes.writeMotorLastTime = currentTime;
     }
-    
   }
   else
   {
     // events for when program is in halt
-  }
+  }     
 
-  if(Serial.available())
-  {
-     readCommand();
-  }
 }
-// =====================Computations Codes ==========================================
-
-void convertToPolarCoord(ArmsVars arm)
-{
-  arm.polR = sqrt(pow(arm.mX,2)+pow(arm.mY,2));
-  arm.polTiter = 1/tan(arm.mY/arm.mX);
-}
-
 //=====================Initialise Codes =============================================
 void initSystem() 
 {
- 
   initAllMotors(motor);
-
-  
   Serial.println("System:System Initialised");
 }
 void initAllMotors(ArmsVars motor[])
@@ -128,6 +101,7 @@ void initAllMotors(ArmsVars motor[])
     Serial.print("System: motor Attached at : motor : ");Serial.print(i);Serial.print(" Pin No : ");Serial.println(motor[i].pinNo);
   }
 
+  //moveAllMotors(motor,targetAngle);
   printMotorState();   
   Serial.println("System:Motor Initialised");
 }
@@ -137,72 +111,50 @@ void printMotorState()
 {
   Serial.print("System: motor0 :  ");Serial.print(motor[0].ArmServo.read());Serial.print(" ");
   Serial.print("motor1 :  ");Serial.print(motor[1].ArmServo.read());Serial.print(" ");
-  Serial.print("motor2 :  ");Serial.println(motor[2].ArmServo.read());Serial.print(" ");
+  Serial.print("motor2 :  ");Serial.print(motor[2].ArmServo.read());Serial.print(" ");
+  Serial.print("threadHalt State :  ");Serial.print(processes.threadHalt);Serial.println(" ");
 }
-
-void readCommand(void)
+void readCommand()
 {
-  processes.threadHalt= true;
-  String Command = Serial.readString(); // reading incoming serial 
-  Serial.print("System: DataDump :");Serial.print(Command);
-  Command.trim();
-  if(Command!= "" )
+  String command = Serial.readString();
+  command.trim();
+ 
+  if(command != "")
   {
-    //char** commands = returnCommandParam(':' , Command);
-    char CommandChar[Command.length()+1];  
-    Command.toCharArray(CommandChar,Command.length());//Converting to char Array
-    int returnArrayLen =countDelimiter(':',CommandChar,Command.length()); // getting no of occurance of delimiter
-    char* subStr[returnArrayLen]; 
+    String method,paramHolding,directionCommand,speedValue;
+    int _speedValue;
     
-    returnCommandParam(':' , Command ,subStr,returnArrayLen);
-    Serial.print("Main: ");Serial.println(subStr[1]);
-  }
-  processes.threadHalt= false;
-}
+    method = command.substring(0,command.indexOf(':')); // needed for checking for valid command
+    paramHolding = command.substring(command.indexOf(':')+1,command.length()); // needed for checking for valid command
+    
+    char methodArray[method.length()+1];
+    strcpy(methodArray,method.c_str()); 
 
-void returnCommandParam(char delimiter ,String command,char* subStr[], int sizeOfArray) // test function 
-{  
-  int count= 0; 
-  int j =0; 
-  for(int i =0 ; i<=sizeOfArray;i++)
-  {
-    String holder=""; 
-    while(command[j] != delimiter || j == sizeof(command) )
+    Serial.println(methodArray);
+    if(strcmp(methodArray ,"Move" )==0)
     {
-      holder += command[j];
-      j++;
+      for(int i =0 ; i <=sizeof(targetAngle);i++)
+      {
+        targetAngle[i]= paramHolding.substring(0 ,paramHolding.indexOf(':')).toInt();
+        paramHolding.remove(0 ,paramHolding.indexOf(':')+1);
+        //Serial.print(targetAngle[i]);
+      }
+     
     }
-    j++; // to skip the delimiter
-    subStr[i]=malloc(j* sizeof(char*));
-    strcpy(subStr[i],holder.c_str());
-
-    Serial.print("returnCommandParam : ");Serial.println(subStr[i]);
-  }
-  return subStr;
-}
-
-
-
-int countDelimiter (char delimiter,char CommandChar[],int charLen)
-{
-  /// Return count of delimiter in a given string 
-  
-  int count=0; 
-  //Testing Points 
-  //Serial.print("charLen : ");Serial.println(charLen);
-  for(int j=0 ; j<=charLen ; j++)
-  {
-     //Testing Points 
-    //Serial.println(CommandChar[j]);
-    if(CommandChar[j]==delimiter)
+    else if(strcmp(methodArray ,"Pause" )==0)
     {
-      count++;
+      if (processes.threadHalt == false)
+      {
+        processes.threadHalt = true; 
+      }
+      else
+      {
+        processes.threadHalt = false; 
+      }
     }
   }
-  //Testing Points 
-  //Serial.print("DelimiterCount : "); Serial.println(count);
-  return count;
 }
+
 
 //=====================Hardware Interfacing / conversion Codes=======================
 void ultraSonicReading(void)
@@ -236,6 +188,15 @@ void ultraSonicReading(void)
     //SerialBT.print(radarMotor.read());SerialBT.print(" ");SerialBT.println(distance);
   }*/
 }
+/*void moveAllMotors(ArmsVars motors[],int targetAngle[])
+{
+  for(int i = 0 ; i <=sizeof(motors);i++)
+  {
+    motors[i].ArmServo.write(targetAngle[i]); 
+    Serial.println(motors[i].ArmServo.read());
+    delay(2);
+  }
+}*/
 void moveAllMotors(ArmsVars motors[],int targetAngle[])
 {
   int stepCount = 1; 
@@ -244,8 +205,10 @@ void moveAllMotors(ArmsVars motors[],int targetAngle[])
   if (sizeof(motors) == sizeof(targetAngle))
   {
     // when angle and motor count are equal 
-    while(numCompleted < sizeof(motors)+1)
+    while(numCompleted <= sizeof(motors))
     {
+     //readCommand();
+     Serial.print("Num completed: ");Serial.print(numCompleted);Serial.print(" Size of motor : ");Serial.println(sizeof(motors));
      for(int i = 0 ; i<=sizeof(motors); i++ )
       {
         if(motor[i].ArmServo.read() < targetAngle[i])
@@ -260,10 +223,17 @@ void moveAllMotors(ArmsVars motors[],int targetAngle[])
         {
           motor[i].desiredState = true; 
           numCompleted ++;
+          Serial.print("Num Completed : ");Serial.println(numCompleted);
         }
+        //Serial.print("motor ");Serial.print(i); Serial.print(" Current angle: ");Serial.print(motor[i].ArmServo.read());Serial.print(" target angle:");Serial.println(targetAngle[i]);
+        //printMotorState();
+        Serial.print("motor ");Serial.print(i); Serial.print("angle: ");Serial.println(motor[i].ArmServo.read());
       }
+      
     }
+    
   }
+  
 }
 void setAllParamFalse(ArmsVars motor[] )
 {

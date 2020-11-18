@@ -1,0 +1,10 @@
+F:\Documents\SCDFxIBM hackathon\SOARRoboticsChallengeTeam6\Software\Arduino Code\RoboticController\CommsTesting Interface\Robotics Testing\Robotics Testing\obj\Debug\Robotics Testing.csprojAssemblyReference.cache
+F:\Documents\SCDFxIBM hackathon\SOARRoboticsChallengeTeam6\Software\Arduino Code\RoboticController\CommsTesting Interface\Robotics Testing\Robotics Testing\obj\Debug\Robotics_Testing.lb_SerialReturn.resources
+F:\Documents\SCDFxIBM hackathon\SOARRoboticsChallengeTeam6\Software\Arduino Code\RoboticController\CommsTesting Interface\Robotics Testing\Robotics Testing\obj\Debug\Robotics_Testing.Properties.Resources.resources
+F:\Documents\SCDFxIBM hackathon\SOARRoboticsChallengeTeam6\Software\Arduino Code\RoboticController\CommsTesting Interface\Robotics Testing\Robotics Testing\obj\Debug\Robotics Testing.csproj.GenerateResource.cache
+F:\Documents\SCDFxIBM hackathon\SOARRoboticsChallengeTeam6\Software\Arduino Code\RoboticController\CommsTesting Interface\Robotics Testing\Robotics Testing\obj\Debug\Robotics Testing.csproj.CoreCompileInputs.cache
+F:\Documents\SCDFxIBM hackathon\SOARRoboticsChallengeTeam6\Software\Arduino Code\RoboticController\CommsTesting Interface\Robotics Testing\Robotics Testing\bin\Debug\Robotics Testing.exe.config
+F:\Documents\SCDFxIBM hackathon\SOARRoboticsChallengeTeam6\Software\Arduino Code\RoboticController\CommsTesting Interface\Robotics Testing\Robotics Testing\bin\Debug\Robotics Testing.exe
+F:\Documents\SCDFxIBM hackathon\SOARRoboticsChallengeTeam6\Software\Arduino Code\RoboticController\CommsTesting Interface\Robotics Testing\Robotics Testing\bin\Debug\Robotics Testing.pdb
+F:\Documents\SCDFxIBM hackathon\SOARRoboticsChallengeTeam6\Software\Arduino Code\RoboticController\CommsTesting Interface\Robotics Testing\Robotics Testing\obj\Debug\Robotics Testing.exe
+F:\Documents\SCDFxIBM hackathon\SOARRoboticsChallengeTeam6\Software\Arduino Code\RoboticController\CommsTesting Interface\Robotics Testing\Robotics Testing\obj\Debug\Robotics Testing.pdb
